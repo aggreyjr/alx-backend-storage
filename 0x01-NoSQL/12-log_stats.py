@@ -1,33 +1,38 @@
 #!/usr/bin/env python3
-""" 12. Log stats
+"""
+Module: my_module
+
+This module provides stats about Nginx logs stored in MongoDB.
 """
 
+import pymongo
 
-from pymongo import MongoClient
 
-
-def log_stats():
-    """ log_stats.
+def nginx_logs_stats(mongo_db, collection_name):
     """
-    client = MongoClient('mongodb://127.0.0.1:27017')
-    logs_collection = client.logs.nginx
-    total = logs_collection.count_documents({})
-    get = logs_collection.count_documents({"method": "GET"})
-    post = logs_collection.count_documents({"method": "POST"})
-    put = logs_collection.count_documents({"method": "PUT"})
-    patch = logs_collection.count_documents({"method": "PATCH"})
-    delete = logs_collection.count_documents({"method": "DELETE"})
-    path = logs_collection.count_documents(
+    Display stats about Nginx logs stored in MongoDB.
+
+    :param mongo_db: pymongo database object
+    :type mongo_db: pymongo.database.Database
+    :param collection_name: Name of the MongoDB collection storing Nginx logs
+    :type collection_name: str
+    """
+    # Get the specified collection
+    collection = mongo_db[collection_name]
+
+    # Total number of logs
+    total_logs = collection.count_documents({})
+
+    print(f"{total_logs} logs where {total_logs}"
+          "is the number of documents in this collection")
+
+    # Methods
+    methods = ["GET", "POST", "PUT", "PATCH", "DELETE"]
+    for method in methods:
+        count = collection.count_documents({"method": method})
+        print(f"\t{count} documents with method={method}")
+
+    # Number of documents with method=GET and path=/status
+    status_count = collection.count_documents(
         {"method": "GET", "path": "/status"})
-    print(f"{total} logs")
-    print("Methods:")
-    print(f"\tmethod GET: {get}")
-    print(f"\tmethod POST: {post}")
-    print(f"\tmethod PUT: {put}")
-    print(f"\tmethod PATCH: {patch}")
-    print(f"\tmethod DELETE: {delete}")
-    print(f"{path} status check")
-
-
-if __name__ == "__main__":
-    log_stats()
+    print(f"\t{status_count} documents with method=GET and path=/status")
