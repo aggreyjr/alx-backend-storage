@@ -8,27 +8,6 @@ from typing import Callable
 
 redis_ = redis.Redis()
 
-'''the module-level redis instance.
-'''
-
-def data_cacher(method: Callable) -> Callable:
-    '''ceches the output of the fetched data.
-    '''
-
-    @wraps(method)
-    def invoker(url) -> str:
-        '''the wrapper function for catching the output.
-        '''
-
-        redis_store.incr(f'count:{url}')
-        result = redis_store.get(f'result:{url}')
-        if result:
-            return result.decode('utf-8')
-        result = method(url)
-        redis_store.set(f'count:{url}', 0)
-        redis_store.setex(f'result:{url}', 10, result)
-        return result
-    return invoker
 
 def count_requests(method: Callable) -> Callable:
     """ Decortator for counting """
